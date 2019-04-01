@@ -102,19 +102,43 @@ AppsKey::
         return
     Escape::
         return
-    Up::
-        WinMove, ahk_id %winid%,, cur_x, cur_y-50, Width, Height+100
-        return
-    Down::
-        WinMove, ahk_id %winid%,, cur_x, cur_y+50, Width, Height-100
-        return
-    Left::
-        WinMove, ahk_id %winid%,, cur_x+25, cur_y, Width-50, Height
-        return
-    Right::
-        WinMove, ahk_id %winid%,, cur_x-25, cur_y, Width+50, Height
-        return
 #If ; turn of context sensitivity
+
+AppsKey & Up::
+    Init()
+    if (cur_y-50 < 0) {
+        incr := 150
+        new_y := 0
+    } else {
+        incr := 100
+        new_y := cur_y - 50
+    }
+    if( (Height + incr) > (A_ScreenHeight-_h_) ) {
+        return
+    }
+    WinMove, ahk_id %winid%,, cur_x, new_y, Width, Height+incr
+    return
+AppsKey & Down::
+    Init()
+    WinMove, ahk_id %winid%,, cur_x, cur_y+50, Width, Height-100
+    return
+AppsKey & Left::
+    Init()
+    WinMove, ahk_id %winid%,, cur_x+25, cur_y, Width-50, Height
+    return
+AppsKey & Right::
+    Init()
+    WinMove, ahk_id %winid%,, cur_x-25, cur_y, Width+50, Height
+    return
+
+
+RAlt::
+    return
+#If (A_PriorHotKey = "RAlt" AND A_TimeSincePriorHotkey < 1000)
+    RAlt::
+        WinMinimize, A
+        return
+#If
 
 Init(){
         global
