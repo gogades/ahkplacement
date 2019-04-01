@@ -17,28 +17,35 @@ class WinInfo {
 center := new WinInfo()
 
 RCtrl::
+    Init()
     return
     
 #If (A_PriorHotKey = "RCtrl" AND A_TimeSincePriorHotkey < 4000)
-    1::
-        tgt := Position["p1"]
-        WinActivate, ahk_id %tgt% 
-        return
-    2::
-        tgt := Position["p2"]
-        WinActivate, ahk_id %tgt% 
-        return
-    3::
-        tgt := Position["p3"]
-        WinActivate, ahk_id %tgt% 
-        return
-    4::
-        tgt := Position["p4"]
-        WinActivate, ahk_id %tgt% 
-        return
     RCtrl::
         tgt := Position["center"]
         WinActivate, ahk_id %tgt% 
+        return
+    1::
+        tgt := WinGetAtCoords(100,100)
+        WinActivate, ahk_id %tgt% 
+        return
+    2::
+        tgt :=  WinGetAtCoords((A_ScreenWidth-right_pad) - 100, 100) 
+        WinActivate, ahk_id %tgt% 
+        return        
+    3::
+        tgt :=  WinGetAtCoords(100,(A_ScreenHeight-_h_) - 100) 
+        WinActivate, ahk_id %tgt% 
+        return
+    4::
+        tgt :=  WinGetAtCoords(A_ScreenWidth -right_pad - 100,(A_ScreenHeight-_h_) - 100) 
+        WinActivate, ahk_id %tgt% 
+        return
+    t::
+        WinActivate, ahk_exe thunderbird.exe
+        return
+    s::
+        WinActivate, ahk_exe slack.exe
         return
 #If
 
@@ -103,4 +110,22 @@ Init(){
         winid := WinExist("A")
         WinGetPos,cur_x,cur_y, Width, Height, ahk_id %winid%
         WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
+}
+
+WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
+{
+	WinGet, IDs, List,,, Program Manager
+	Loop, %ids%
+	{
+		_hWin := ids%A_Index%
+		WinGetTitle, title, ahk_id %_hWin%
+		WinGetPos,,, w, h, ahk_id %_hWin%
+		if (w < 110 or h < 110 or title = "") ; Comment this out if you want to include small windows and windows without title
+			continue
+		WinGetPos, left, top, right, bottom, ahk_id %_hWin%
+		right += left, bottom += top
+		if (xCoord >= left && xCoord <= right && yCoord >= top && yCoord <= bottom && _hWin != ExludeWinID)
+            break
+	}
+	return _hWin
 }
