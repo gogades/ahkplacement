@@ -6,6 +6,16 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 Position := {"p1":0, "p2":0, "p3":0, "p4":0, "center": 0}
 
+class WinInfo {
+    id := -1
+    x := 0
+    y := 0
+    width := 0
+    height := 0
+}
+
+center := new WinInfo()
+
 RCtrl::
     return
     
@@ -42,7 +52,20 @@ AppsKey::
     c::
     AppsKey::
         Position["center"]:=winid
-        WinMove, ahk_id %winid% ,, ((A_ScreenWidth-right_pad)/2)-(Width/2), ((A_ScreenHeight-_h_)/2)-(Height/2)
+        if (winid != center.id or center.id == -1) {
+            center.id := winid
+            center.x := cur_x
+            center.y := cur_y
+            center.width := Width
+            center.height := Height
+            new_x := ((A_ScreenWidth-right_pad)/2)-(Width/2)
+            new_y := ((A_ScreenHeight-_h_)/2)-(Height/2)
+        } else {
+            new_x := center.x
+            new_y := center.y
+            center.id := -1
+        }
+        WinMove, ahk_id %winid% ,, new_x, new_y
         return
     w::
     1::
@@ -78,6 +101,6 @@ Init(){
         global
         right_pad := 205
         winid := WinExist("A")
-        WinGetPos,,, Width, Height, ahk_id %winid%
+        WinGetPos,cur_x,cur_y, Width, Height, ahk_id %winid%
         WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
 }
