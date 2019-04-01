@@ -102,6 +102,18 @@ AppsKey::
         return
     Escape::
         return
+    Up::
+        WinMove, ahk_id %winid%,, cur_x, cur_y-50, Width, Height+100
+        return
+    Down::
+        WinMove, ahk_id %winid%,, cur_x, cur_y+50, Width, Height-100
+        return
+    Left::
+        WinMove, ahk_id %winid%,, cur_x+25, cur_y, Width-50, Height
+        return
+    Right::
+        WinMove, ahk_id %winid%,, cur_x-25, cur_y, Width+50, Height
+        return
 #If ; turn of context sensitivity
 
 Init(){
