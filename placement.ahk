@@ -47,6 +47,12 @@ RCtrl::
     s::
         WinActivate, ahk_exe slack.exe
         return
+    k::
+        WinActivate, ahk_exe kitty.exe
+        return
+    v::
+        WinActivate, ahk_exe vncviewer.exe
+        return
 #If
 
 AppsKey:: 
