@@ -19,7 +19,10 @@ center := new WinInfo()
 RCtrl::
     Init()
     return
-    
+
+; this allows non-handled rctrl keys to continue working
+RCtrl & [::return
+
 #If (A_PriorHotKey = "RCtrl" AND A_TimeSincePriorHotkey < 4000)
     RCtrl::
         tgt := Position["center"]
@@ -52,12 +55,6 @@ RCtrl::
         return
     v::
         WinActivate, ahk_exe vncviewer.exe
-        return
-    c::
-        Send, ^c
-        return
-    a::
-        Send, ^a
         return
 #If
 
@@ -152,6 +149,9 @@ RAlt::
         return
 #If
 
+; this allows non-handle alt keys to continue working
+RAlt & [::return
+
 Init(){
         global
         right_pad := 205
@@ -167,6 +167,8 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
 	{
 		_hWin := ids%A_Index%
 		WinGetTitle, title, ahk_id %_hWin%
+        if( title == "NVIDIA GeForce Overlay" or title == "Stream Viewer" or InStr(title, "VirtualBox"))
+            continue
 		WinGetPos,,, w, h, ahk_id %_hWin%
 		if (w < 110 or h < 110 or title = "") ; Comment this out if you want to include small windows and windows without title
 			continue
