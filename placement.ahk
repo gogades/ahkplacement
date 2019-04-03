@@ -53,6 +53,12 @@ RCtrl::
     v::
         WinActivate, ahk_exe vncviewer.exe
         return
+    c::
+        Send, ^c
+        return
+    a::
+        Send, ^a
+        return
 #If
 
 AppsKey:: 
