@@ -13,47 +13,63 @@ class WinInfo {
     width := 0
     height := 0
 }
+global ctrl_enabled
+ctrl_enabled := false
 
+clear_ctrl:
+    ResetCtrl()
+    
 center := new WinInfo()
 
 RCtrl::
     Init()
+    ctrl_enabled := true
+    SetTimer, clear_ctrl, 2000
     return
 
 ; this allows non-handled rctrl keys to continue working
 RCtrl & [::return
 
-#If (A_PriorHotKey = "RCtrl" AND A_TimeSincePriorHotkey < 4000)
+#If (ctrl_enabled == true)
     RCtrl::
+        ResetCtrl()
         tgt := Position["center"]
         WinActivate, ahk_id %tgt% 
         return
     1::
+        ResetCtrl()
         tgt := WinGetAtCoords(100,100)
         WinActivate, ahk_id %tgt% 
         return
     2::
+        ResetCtrl()
         tgt :=  WinGetAtCoords((A_ScreenWidth-right_pad) - 100, 100) 
         WinActivate, ahk_id %tgt% 
         return        
     3::
+        ResetCtrl()
         tgt :=  WinGetAtCoords(100,(A_ScreenHeight-_h_) - 100) 
         WinActivate, ahk_id %tgt% 
         return
     4::
+        ResetCtrl()
         tgt :=  WinGetAtCoords(A_ScreenWidth -right_pad - 100,(A_ScreenHeight-_h_) - 100) 
         WinActivate, ahk_id %tgt% 
         return
     t::
+        ResetCtrl()
         WinActivate, ahk_exe thunderbird.exe
         return
     s::
+        ResetCtrl()
         WinActivate, ahk_exe slack.exe
         return
     k::
+        ResetCtrl()
         WinActivate, ahk_exe kitty.exe
         return
     v::
+        ResetCtrl()
         WinActivate, ahk_exe vncviewer.exe
         return
 #If
@@ -178,4 +194,9 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
             break
 	}
 	return _hWin
+}
+
+ResetCtrl() {
+    ctrl_enabled := false
+    SetTimer, clear_ctrl, Off
 }
