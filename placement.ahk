@@ -65,34 +65,34 @@ ProcessCommand(KeyPressed) {
 			tgtid := WinGetAtCoords(100,100)
 		} else {
 			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,0,0, (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
 			HideGui()
 			return
 		}
 	} else if( KeyPressed == "2" ) {
 		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100, 100) 
+			tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
 		} else {
 			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,(A_ScreenWidth-context["right_pad"])/2,0, (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
 			HideGui()
 			return
 		}
 	} else if( KeyPressed == "3" ) {
 		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(100,A_ScreenHeight-context["tray_h"]-100) 
+			tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
 		} else {
 			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,0,((A_ScreenHeight-context["tray_h"])/2), (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
 			HideGui()
 			return
 		}
 	} else if( KeyPressed == "4" ) {
 		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100,A_ScreenHeight-context["tray_h"]-100) 
+			tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
 		} else {
 			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,(A_ScreenWidth-context["right_pad"])/2,((A_ScreenHeight-context["tray_h"])/2), (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
 			HideGui()
 			return
 		}
@@ -108,8 +108,8 @@ ProcessCommand(KeyPressed) {
 		if( context["placement"] == false ) {
 			tgtid := context["center_window"]
 		} else {
-			new_x := ((A_ScreenWidth-context["right_pad"])/2)-(context["cur_w"]/2)
-            new_y := ((A_ScreenHeight-context["tray_h"])/2)-(context["cur_h"]/2)
+			new_x := (context["e_sw"]/2)-(context["cur_w"]/2)
+            new_y := (context["e_sh"]/2)-(context["cur_h"]/2)
 			tmpid := context["winid"]
 			WinMove, ahk_id %tmpid% ,, new_x, new_y
 			context["center_window"] := tmpid
@@ -131,17 +131,21 @@ Init(){
         global 
 		context["right_pad"] := 205
 		context["winid"] := WinExist("A")
-        right_pad := 205
-        winid := WinExist("A")
-        
+        winid := context["winid"]
 		WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
+		
 		context["cur_x"] := cur_x
 		context["cur_y"] := cur_y
 		context["cur_w"] := Width
 		context["cur_h"] := Height
+		
         WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
 		context["tray_w"] := _w_
 		context["tray_h"] := _h_
+		; effective screen size
+		context["e_sw"] := A_ScreenWidth - context["right_pad"]
+		context["e_sh"] := A_ScreenHeight - context["tray_h"]
+		
 		context["placement"] := false
 }
 
