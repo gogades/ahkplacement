@@ -22,7 +22,9 @@ RControl::
 	Gui, Show
 
 HideGui() {
+	global context
 	Gui, Hide
+	context["placement"] := false
 }
 
 ON_KEYDOWN(WP, LP) {
@@ -30,8 +32,6 @@ ON_KEYDOWN(WP, LP) {
       Return 0
    VK := Hex(WP & 0xFF, 2)
    SC := Hex((LP & 0x1FF0000) >> 16, 3)
-   ;~ Row := LV_Add("", GetKeyName("VK" . VK . "SC" . SC), VK, SC)
-   ;~ LV_Modify(Row, "Vis")
    nm := GetKeyName("VK" . VK . "SC" . SC)
    ProcessCommand(nm)
    Return 0
@@ -39,9 +39,10 @@ ON_KEYDOWN(WP, LP) {
 
 Hex(I, N) {
    SetFormat, Integerfast, H
-   Return SubStr("00000000" . SubStr(I + 0,3), 1 - N)
+   tmpstr := SubStr("00000000" . SubStr(I + 0,3), 1 - N)
+   SetFormat, Integerfast, D
+   return tmpstr
 }
-
 
 ProcessCommand(KeyPressed) {
 	global right_pad, _h_, _w_, context
@@ -60,21 +61,63 @@ ProcessCommand(KeyPressed) {
 	} if( KeyPressed == "v") {
 		WinGet, tgtid, ID, ahk_exe vncviewer.exe
 	} else if( KeyPressed == "1" ) {
-		tgtid := WinGetAtCoords(100,100)
+		if( context["placement"] == false ) {
+			tgtid := WinGetAtCoords(100,100)
+		} else {
+			tmpid := context["winid"]
+			WinMove, ahk_id %tmpid% ,,0,0, (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			HideGui()
+			return
+		}
 	} else if( KeyPressed == "2" ) {
-		tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100, 100) 
+		if( context["placement"] == false ) {
+			tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100, 100) 
+		} else {
+			tmpid := context["winid"]
+			WinMove, ahk_id %tmpid% ,,(A_ScreenWidth-context["right_pad"])/2,0, (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			HideGui()
+			return
+		}
 	} else if( KeyPressed == "3" ) {
-		tgtid := WinGetAtCoords(100,A_ScreenHeight-context["tray_h"]-100) 
+		if( context["placement"] == false ) {
+			tgtid := WinGetAtCoords(100,A_ScreenHeight-context["tray_h"]-100) 
+		} else {
+			tmpid := context["winid"]
+			WinMove, ahk_id %tmpid% ,,0,((A_ScreenHeight-context["tray_h"])/2), (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			HideGui()
+			return
+		}
 	} else if( KeyPressed == "4" ) {
-		tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100,A_ScreenHeight-context["tray_h"]-100) 
+		if( context["placement"] == false ) {
+			tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100,A_ScreenHeight-context["tray_h"]-100) 
+		} else {
+			tmpid := context["winid"]
+			WinMove, ahk_id %tmpid% ,,(A_ScreenWidth-context["right_pad"])/2,((A_ScreenHeight-context["tray_h"])/2), (A_ScreenWidth-context["right_pad"])/2, ((A_ScreenHeight-context["tray_h"])/2)
+			HideGui()
+			return
+		}
 	} else if( KeyPressed == "m" ) {
 		context["placement"] := true
+		SetTimer, HideGui, 5000
 		return
-	} else if( KeyPressed == "p"  ) {
+	} else if( KeyPressed == "p" ) {
 		if( context["previous"] != "" ) {
 			tgtid := context["previous"]
 		} 
+	} else if( KeyPressed == "c" ) {
+		if( context["placement"] == false ) {
+			tgtid := context["center_window"]
+		} else {
+			new_x := ((A_ScreenWidth-context["right_pad"])/2)-(context["cur_w"]/2)
+            new_y := ((A_ScreenHeight-context["tray_h"])/2)-(context["cur_h"]/2)
+			tmpid := context["winid"]
+			WinMove, ahk_id %tmpid% ,, new_x, new_y
+			context["center_window"] := tmpid
+			HideGui()
+			return
+		}
 	}
+	
 	if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
 		context["previous"] := context["winid"]
 		WinActivate, ahk_id %tgtid%
@@ -105,7 +148,6 @@ Init(){
 WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
 {
 	global winid, cur_x, cur_y, Width, Height, _w_, _h_, context
-	SetFormat, IntegerFast, D
 	WinGet, _IDs, List,,, Program Manager
 	Loop, %_ids%
 	{
