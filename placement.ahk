@@ -1,192 +1,120 @@
-﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance force
 
-Position := {"p1":0, "p2":0, "p3":0, "p4":0, "center": 0}
+context := {}
 
-class WinInfo {
-    id := -1
-    x := 0
-    y := 0
-    width := 0
-    height := 0
+; SetBatchLines, -1
+Gui, Margin, 20, 20
+Gui, Add, Text, , Enter Command
+OnMessage(WM_KEYDOWN := 0x100, "ON_KEYDOWN")
+OnMessage(WM_SYSKEYDOWN := 0x104, "ON_KEYDOWN")
+Return
+
+GuiClose:
+Gui, Hide
+
+RControl::
+	SetTimer, HideGui, 5000
+	Init()
+	Gui, Show
+
+HideGui() {
+	Gui, Hide
 }
-global ctrl_enabled
-ctrl_enabled := false
 
-clear_ctrl:
-    ResetCtrl()
-    
-center := new WinInfo()
+ON_KEYDOWN(WP, LP) {
+   If (LP & 0x40000000) ; most likely auto-repeat
+      Return 0
+   VK := Hex(WP & 0xFF, 2)
+   SC := Hex((LP & 0x1FF0000) >> 16, 3)
+   ;~ Row := LV_Add("", GetKeyName("VK" . VK . "SC" . SC), VK, SC)
+   ;~ LV_Modify(Row, "Vis")
+   nm := GetKeyName("VK" . VK . "SC" . SC)
+   ProcessCommand(nm)
+   Return 0
+}
 
-RCtrl::
-    Init()
-    ctrl_enabled := true
-    SetTimer, clear_ctrl, 2000
-    return
-
-; this allows non-handled rctrl keys to continue working
-RCtrl & [::return
-
-#If (ctrl_enabled == true)
-    RCtrl::
-        ResetCtrl()
-        tgt := Position["center"]
-        WinActivate, ahk_id %tgt% 
-        return
-    1::
-        ResetCtrl()
-        tgt := WinGetAtCoords(100,100)
-        WinActivate, ahk_id %tgt% 
-        return
-    2::
-        ResetCtrl()
-        tgt :=  WinGetAtCoords((A_ScreenWidth-right_pad) - 100, 100) 
-        WinActivate, ahk_id %tgt% 
-        return        
-    3::
-        ResetCtrl()
-        tgt :=  WinGetAtCoords(100,(A_ScreenHeight-_h_) - 100) 
-        WinActivate, ahk_id %tgt% 
-        return
-    4::
-        ResetCtrl()
-        tgt :=  WinGetAtCoords(A_ScreenWidth -right_pad - 100,(A_ScreenHeight-_h_) - 100) 
-        WinActivate, ahk_id %tgt% 
-        return
-    t::
-        ResetCtrl()
-        WinActivate, ahk_exe thunderbird.exe
-        return
-    s::
-        ResetCtrl()
-        WinActivate, ahk_exe slack.exe
-        return
-    k::
-        ResetCtrl()
-        WinActivate, ahk_exe kitty.exe
-        return
-    v::
-        ResetCtrl()
-        WinActivate, ahk_exe vncviewer.exe
-        return
-#If
-
-AppsKey:: 
-    Init()
-    return
-
-; The #If directive creates context-sensitive hotkeys:
-
-#If (A_PriorHotKey = "AppsKey" AND A_TimeSincePriorHotkey < 4000)
-    c::
-    AppsKey::
-        Position["center"]:=winid
-        if (winid != center.id or center.id == -1) {
-            center.id := winid
-            center.x := cur_x
-            center.y := cur_y
-            center.width := Width
-            center.height := Height
-            new_x := ((A_ScreenWidth-right_pad)/2)-(Width/2)
-            new_y := ((A_ScreenHeight-_h_)/2)-(Height/2)
-        } else {
-            new_x := center.x
-            new_y := center.y
-            center.id := -1
-        }
-        WinMove, ahk_id %winid% ,, new_x, new_y
-        return
-    w::
-    1::
-        Position["p1"]:=winid
-        WinMove, ahk_id %winid% ,,0,0, (A_ScreenWidth-right_pad)/2, ((A_ScreenHeight-_h_)/2)
-        return
-    e::
-    2::
-        Position["p2"]:=winid
-        WinMove, ahk_id %winid% ,,(A_ScreenWidth-right_pad)/2,0, (A_ScreenWidth-right_pad)/2, ((A_ScreenHeight-_h_)/2)
-        return
-    s::
-    3::
-        Position["p3"]:=winid
-        WinMove, ahk_id %winid% ,,0,((A_ScreenHeight-_h_)/2), (A_ScreenWidth-right_pad)/2, ((A_ScreenHeight-_h_)/2)
-        return
-    d::
-    4::
-        Position["p4"]:=winid
-        WinMove, ahk_id %winid% ,,(A_ScreenWidth-right_pad)/2,((A_ScreenHeight-_h_)/2), (A_ScreenWidth-right_pad)/2, ((A_ScreenHeight-_h_)/2)
-        return
-    f::
-        WinMove, ahk_id %winid% ,,0,0, (A_ScreenWidth-right_pad), (A_ScreenHeight-_h_)
-        return
-    r::
-        Reload
-        return
-    Escape::
-        return
-#If ; turn of context sensitivity
-
-AppsKey & Up::
-    Init()
-    if (cur_y-50 < 0) {
-        incr := 150
-        new_y := 0
-    } else {
-        incr := 100
-        new_y := cur_y - 50
-    }
-    if( (Height + incr) > (A_ScreenHeight-_h_) ) {
-        return
-    }
-    WinMove, ahk_id %winid%,, cur_x, new_y, Width, Height+incr
-    return
-AppsKey & Down::
-    Init()
-    WinMove, ahk_id %winid%,, cur_x, cur_y+50, Width, Height-100
-    return
-AppsKey & Left::
-    Init()
-    WinMove, ahk_id %winid%,, cur_x+25, cur_y, Width-50, Height
-    return
-AppsKey & Right::
-    Init()
-    WinMove, ahk_id %winid%,, cur_x-25, cur_y, Width+50, Height
-    return
+Hex(I, N) {
+   SetFormat, Integerfast, H
+   Return SubStr("00000000" . SubStr(I + 0,3), 1 - N)
+}
 
 
-RAlt::
-    return
-#If (A_PriorHotKey = "RAlt" AND A_TimeSincePriorHotkey < 1000)
-    RAlt::
-        WinMinimize, A
-        return
-#If
-
-; this allows non-handle alt keys to continue working
-RAlt & [::return
+ProcessCommand(KeyPressed) {
+	global right_pad, _h_, _w_, context
+	SetTimer, GuiClose, Off
+	If (KeyPressed == "Escape") {
+		HideGui()        	    
+	}
+	; next commands need Init() called first
+	tgtid := -1
+	if( KeyPressed == "t") {
+		WinGet, tgtid, ID, ahk_exe thunderbird.exe
+	} else if( KeyPressed == "s") {
+		WinGet, tgtid, ID, ahk_exe slack.exe
+	} else if( KeyPressed == "k") {
+		WinGet, tgtid, ID, ahk_exe kitty.exe
+	} if( KeyPressed == "v") {
+		WinGet, tgtid, ID, ahk_exe vncviewer.exe
+	} else if( KeyPressed == "1" ) {
+		tgtid := WinGetAtCoords(100,100)
+	} else if( KeyPressed == "2" ) {
+		tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100, 100) 
+	} else if( KeyPressed == "3" ) {
+		tgtid := WinGetAtCoords(100,A_ScreenHeight-context["tray_h"]-100) 
+	} else if( KeyPressed == "4" ) {
+		tgtid := WinGetAtCoords(A_ScreenWidth-context["right_pad"]-100,A_ScreenHeight-context["tray_h"]-100) 
+	} else if( KeyPressed == "m" ) {
+		context["placement"] := true
+		return
+	} else if( KeyPressed == "p"  ) {
+		if( context["previous"] != "" ) {
+			tgtid := context["previous"]
+		} 
+	}
+	if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
+		context["previous"] := context["winid"]
+		WinActivate, ahk_id %tgtid%
+	} else {
+		;~ MsgBox, not found
+	}
+	HideGui()
+}
 
 Init(){
-        global
+        global 
+		context["right_pad"] := 205
+		context["winid"] := WinExist("A")
         right_pad := 205
         winid := WinExist("A")
-        WinGetPos,cur_x,cur_y, Width, Height, ahk_id %winid%
+        
+		WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
+		context["cur_x"] := cur_x
+		context["cur_y"] := cur_y
+		context["cur_w"] := Width
+		context["cur_h"] := Height
         WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
+		context["tray_w"] := _w_
+		context["tray_h"] := _h_
+		context["placement"] := false
 }
 
 WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
 {
-	WinGet, IDs, List,,, Program Manager
-	Loop, %ids%
+	global winid, cur_x, cur_y, Width, Height, _w_, _h_, context
+	SetFormat, IntegerFast, D
+	WinGet, _IDs, List,,, Program Manager
+	Loop, %_ids%
 	{
-		_hWin := ids%A_Index%
-		WinGetTitle, title, ahk_id %_hWin%
-        if( title == "NVIDIA GeForce Overlay" or title == "Stream Viewer" or InStr(title, "VirtualBox"))
+		_hWin := _ids%A_Index%
+		WinGetTitle, _title, ahk_id %_hWin%
+        if( _title == "NVIDIA GeForce Overlay" or _title == "Stream Viewer" or InStr(_title, "VirtualBox"))
             continue
 		WinGetPos,,, w, h, ahk_id %_hWin%
-		if (w < 110 or h < 110 or title = "") ; Comment this out if you want to include small windows and windows without title
+		if (w < 110 or h < 110 or _title = "") ; Comment this out if you want to include small windows and windows without title
 			continue
 		WinGetPos, left, top, right, bottom, ahk_id %_hWin%
 		right += left, bottom += top
@@ -196,7 +124,13 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
 	return _hWin
 }
 
-ResetCtrl() {
-    ctrl_enabled := false
-    SetTimer, clear_ctrl, Off
-}
+RAlt::
+    return
+#If (A_PriorHotKey = "RAlt" AND A_TimeSincePriorHotkey < 500)
+    RAlt::
+        WinMinimize, A
+        return
+#If
+
+; this allows non-handle alt keys to continue working
+RAlt & j::Send, {RAlt Down}j{RAlt Up}
