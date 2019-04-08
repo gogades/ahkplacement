@@ -17,14 +17,14 @@ GuiClose:
 Gui, Hide
 
 RControl::
-	SetTimer, HideGui, 5000
-	Init()
-	Gui, Show
+    SetTimer, HideGui, 5000
+    Init()
+    Gui, Show
 
 HideGui() {
-	global context
-	Gui, Hide
-	context["placement"] := false
+    global context
+    Gui, Hide
+    context["placement"] := false
 }
 
 ON_KEYDOWN(WP, LP) {
@@ -45,129 +45,129 @@ Hex(I, N) {
 }
 
 ProcessCommand(KeyPressed) {
-	global right_pad, _h_, _w_, context
-	SetTimer, GuiClose, Off
-	If (KeyPressed == "Escape") {
-		HideGui()        	    
-	}
-	; next commands need Init() called first
-	tgtid := -1
-	if( KeyPressed == "t") {
-		WinGet, tgtid, ID, ahk_exe thunderbird.exe
-	} else if( KeyPressed == "s") {
-		WinGet, tgtid, ID, ahk_exe slack.exe
-	} else if( KeyPressed == "k") {
-		WinGet, tgtid, ID, ahk_exe kitty.exe
-	} if( KeyPressed == "v") {
-		WinGet, tgtid, ID, ahk_exe vncviewer.exe
-	} else if( KeyPressed == "1" ) {
-		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(100,100)
-		} else {
-			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
-			HideGui()
-			return
-		}
-	} else if( KeyPressed == "2" ) {
-		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
-		} else {
-			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
-			HideGui()
-			return
-		}
-	} else if( KeyPressed == "3" ) {
-		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
-		} else {
-			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
-			HideGui()
-			return
-		}
-	} else if( KeyPressed == "4" ) {
-		if( context["placement"] == false ) {
-			tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
-		} else {
-			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
-			HideGui()
-			return
-		}
-	} else if( KeyPressed == "m" ) {
-		context["placement"] := true
-		SetTimer, HideGui, 5000
-		return
-	} else if( KeyPressed == "p" ) {
-		if( context["previous"] != "" ) {
-			tgtid := context["previous"]
-		} 
-	} else if( KeyPressed == "c" ) {
-		if( context["placement"] == false ) {
-			tgtid := context["center_window"]
-		} else {
-			new_x := (context["e_sw"]/2)-(context["cur_w"]/2)
+    global right_pad, _h_, _w_, context
+    SetTimer, GuiClose, Off
+    If (KeyPressed == "Escape") {
+        HideGui()        	    
+    }
+    ; next commands need Init() called first
+    tgtid := -1
+    if( KeyPressed == "t") {
+        WinGet, tgtid, ID, ahk_exe thunderbird.exe
+    } else if( KeyPressed == "s") {
+        WinGet, tgtid, ID, ahk_exe slack.exe
+    } else if( KeyPressed == "k") {
+        WinGet, tgtid, ID, ahk_exe kitty.exe
+    } if( KeyPressed == "v") {
+        WinGet, tgtid, ID, ahk_exe vncviewer.exe
+    } else if( KeyPressed == "1" ) {
+        if( context["placement"] == false ) {
+            tgtid := WinGetAtCoords(100,100)
+        } else {
+            tmpid := context["winid"]
+            WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
+            HideGui()
+            return
+        }
+    } else if( KeyPressed == "2" ) {
+        if( context["placement"] == false ) {
+            tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
+        } else {
+            tmpid := context["winid"]
+            WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
+            HideGui()
+            return
+        }
+    } else if( KeyPressed == "3" ) {
+        if( context["placement"] == false ) {
+            tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
+        } else {
+            tmpid := context["winid"]
+            WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
+            HideGui()
+            return
+        }
+    } else if( KeyPressed == "4" ) {
+        if( context["placement"] == false ) {
+            tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
+        } else {
+            tmpid := context["winid"]
+            WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
+            HideGui()
+            return
+        }
+    } else if( KeyPressed == "m" ) {
+        context["placement"] := true
+        SetTimer, HideGui, 5000
+        return
+    } else if( KeyPressed == "p" ) {
+        if( context["previous"] != "" ) {
+            tgtid := context["previous"]
+        } 
+    } else if( KeyPressed == "c" ) {
+        if( context["placement"] == false ) {
+            tgtid := context["center_window"]
+        } else {
+            new_x := (context["e_sw"]/2)-(context["cur_w"]/2)
             new_y := (context["e_sh"]/2)-(context["cur_h"]/2)
-			tmpid := context["winid"]
-			WinMove, ahk_id %tmpid% ,, new_x, new_y
-			context["center_window"] := tmpid
-			HideGui()
-			return
-		}
-	}
-	
-	if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
-		context["previous"] := context["winid"]
-		WinActivate, ahk_id %tgtid%
-	} else {
-		;~ MsgBox, not found
-	}
-	HideGui()
+            tmpid := context["winid"]
+            WinMove, ahk_id %tmpid% ,, new_x, new_y
+            context["center_window"] := tmpid
+            HideGui()
+            return
+        }
+    }
+    
+    if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
+        context["previous"] := context["winid"]
+        WinActivate, ahk_id %tgtid%
+    } else {
+        ;~ MsgBox, not found
+    }
+    HideGui()
 }
 
 Init(){
         global 
-		context["right_pad"] := 205
-		context["winid"] := WinExist("A")
+        context["right_pad"] := 205
+        context["winid"] := WinExist("A")
         winid := context["winid"]
-		WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
-		
-		context["cur_x"] := cur_x
-		context["cur_y"] := cur_y
-		context["cur_w"] := Width
-		context["cur_h"] := Height
-		
+        WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
+        
+        context["cur_x"] := cur_x
+        context["cur_y"] := cur_y
+        context["cur_w"] := Width
+        context["cur_h"] := Height
+        
         WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
-		context["tray_w"] := _w_
-		context["tray_h"] := _h_
-		; effective screen size
-		context["e_sw"] := A_ScreenWidth - context["right_pad"]
-		context["e_sh"] := A_ScreenHeight - context["tray_h"]
-		
-		context["placement"] := false
+        context["tray_w"] := _w_
+        context["tray_h"] := _h_
+        ; effective screen size
+        context["e_sw"] := A_ScreenWidth - context["right_pad"]
+        context["e_sh"] := A_ScreenHeight - context["tray_h"]
+        
+        context["placement"] := false
 }
 
 WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
 {
-	global winid, cur_x, cur_y, Width, Height, _w_, _h_, context
-	WinGet, _IDs, List,,, Program Manager
-	Loop, %_ids%
-	{
-		_hWin := _ids%A_Index%
-		WinGetTitle, _title, ahk_id %_hWin%
+    global winid, cur_x, cur_y, Width, Height, _w_, _h_, context
+    WinGet, _IDs, List,,, Program Manager
+    Loop, %_ids%
+    {
+        _hWin := _ids%A_Index%
+        WinGetTitle, _title, ahk_id %_hWin%
         if( _title == "NVIDIA GeForce Overlay" or _title == "Stream Viewer" or InStr(_title, "VirtualBox"))
             continue
-		WinGetPos,,, w, h, ahk_id %_hWin%
-		if (w < 110 or h < 110 or _title = "") ; Comment this out if you want to include small windows and windows without title
-			continue
-		WinGetPos, left, top, right, bottom, ahk_id %_hWin%
-		right += left, bottom += top
-		if (xCoord >= left && xCoord <= right && yCoord >= top && yCoord <= bottom && _hWin != ExludeWinID)
+        WinGetPos,,, w, h, ahk_id %_hWin%
+        if (w < 110 or h < 110 or _title = "") ; Comment this out if you want to include small windows and windows without title
+            continue
+        WinGetPos, left, top, right, bottom, ahk_id %_hWin%
+        right += left, bottom += top
+        if (xCoord >= left && xCoord <= right && yCoord >= top && yCoord <= bottom && _hWin != ExludeWinID)
             break
-	}
-	return _hWin
+    }
+    return _hWin
 }
 
 RAlt::
