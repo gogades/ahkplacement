@@ -73,7 +73,10 @@ ProcessCommand(KeyPressed) {
     }
     ; next commands need Init() called first
     tgtid := -1
-    if( KeyPressed == "t") {
+    if( KeyPressed == "o") {
+        WinGet, tgtid, ID, ahk_exe Spotify.exe
+        Focus(tgtid)
+    } else if( KeyPressed == "t") {
         WinGet, tgtid, ID, ahk_exe thunderbird.exe
         Focus(tgtid)
     } else if( KeyPressed == "s") {
