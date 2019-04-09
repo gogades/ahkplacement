@@ -88,7 +88,7 @@ ProcessCommand(KeyPressed) {
     } if( KeyPressed == "v") {
         WinGet, tgtid, ID, ahk_exe vncviewer.exe
         Focus(tgtid)
-    } else if( KeyPressed == "1" ) {
+    } else if( KeyPressed == "1" or KeyPressed == "Home" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(100,100)
             Focus(tgtid)
@@ -96,7 +96,7 @@ ProcessCommand(KeyPressed) {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
         }
-    } else if( KeyPressed == "2" ) {
+    } else if( KeyPressed == "2" or KeyPressed == "PgUp" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
             Focus(tgtid)
@@ -104,7 +104,7 @@ ProcessCommand(KeyPressed) {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
         }
-    } else if( KeyPressed == "3" ) {
+    } else if( KeyPressed == "3" or KeyPressed == "End" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
             Focus(tgtid)
@@ -112,7 +112,7 @@ ProcessCommand(KeyPressed) {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
         }
-    } else if( KeyPressed == "4" ) {
+    } else if( KeyPressed == "4" or KeyPressed == "PgDn" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
             Focus(tgtid)
@@ -124,10 +124,10 @@ ProcessCommand(KeyPressed) {
         context["placement"] := true
         SetTimer, HideGui, 5000
         return
-    } else if( KeyPressed == "p" ) {
+    } else if( KeyPressed == "p" or KeyPressed == "Delete" ) {
         tgtid := context["previous"]
         Focus(tgtid)
-    } else if( KeyPressed == "c" ) {
+    } else if( KeyPressed == "c" or KeyPressed == "``" ) {
         if( context["placement"] == false ) {
             tgtid := context["center_window"]
             Focus(tgtid)
