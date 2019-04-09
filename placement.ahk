@@ -8,7 +8,7 @@ context := {}
 
 ; SetBatchLines, -1
 Gui, Margin, 20, 20
-Gui, Add, Text, , Enter Command
+Gui, Add, Text, vStatus , Enter Command
 OnMessage(WM_KEYDOWN := 0x100, "ON_KEYDOWN")
 OnMessage(WM_SYSKEYDOWN := 0x104, "ON_KEYDOWN")
 Return
@@ -54,76 +54,69 @@ ProcessCommand(KeyPressed) {
     tgtid := -1
     if( KeyPressed == "t") {
         WinGet, tgtid, ID, ahk_exe thunderbird.exe
+        Focus(tgtid)
     } else if( KeyPressed == "s") {
         WinGet, tgtid, ID, ahk_exe slack.exe
+        Focus(tgtid)
     } else if( KeyPressed == "k") {
         WinGet, tgtid, ID, ahk_exe kitty.exe
+        Focus(tgtid)
     } if( KeyPressed == "v") {
         WinGet, tgtid, ID, ahk_exe vncviewer.exe
+        Focus(tgtid)
     } else if( KeyPressed == "1" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(100,100)
+            Focus(tgtid)
         } else {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
-            HideGui()
-            return
         }
     } else if( KeyPressed == "2" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
+            Focus(tgtid)
         } else {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
-            HideGui()
-            return
         }
     } else if( KeyPressed == "3" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
+            Focus(tgtid)
         } else {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
-            HideGui()
-            return
         }
     } else if( KeyPressed == "4" ) {
         if( context["placement"] == false ) {
             tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
+            Focus(tgtid)
         } else {
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
-            HideGui()
-            return
         }
     } else if( KeyPressed == "m" ) {
         context["placement"] := true
         SetTimer, HideGui, 5000
         return
     } else if( KeyPressed == "p" ) {
-        if( context["previous"] != "" ) {
-            tgtid := context["previous"]
-        } 
+        tgtid := context["previous"]
+        Focus(tgtid)
     } else if( KeyPressed == "c" ) {
         if( context["placement"] == false ) {
             tgtid := context["center_window"]
+            Focus(tgtid)
         } else {
             new_x := (context["e_sw"]/2)-(context["cur_w"]/2)
             new_y := (context["e_sh"]/2)-(context["cur_h"]/2)
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,, new_x, new_y
             context["center_window"] := tmpid
-            HideGui()
-            return
         }
     }
-    
-    if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
-        context["previous"] := context["winid"]
-        WinActivate, ahk_id %tgtid%
-    } else {
-        ;~ MsgBox, not found
-    }
+    ;~ GuiControl,,Status, Focus %KeyPressed%
+    ;~ Sleep, 500
     HideGui()
 }
 
@@ -147,6 +140,17 @@ Init(){
         context["e_sh"] := A_ScreenHeight - context["tray_h"]
         
         context["placement"] := false
+}
+
+Focus(tgtid)
+{
+    global context
+    if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
+        context["previous"] := context["winid"]
+        WinActivate, ahk_id %tgtid%
+    } else {
+        ;~ MsgBox, not found
+    }
 }
 
 WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
