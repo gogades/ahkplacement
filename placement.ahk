@@ -13,9 +13,6 @@ OnMessage(WM_KEYDOWN := 0x100, "ON_KEYDOWN")
 OnMessage(WM_SYSKEYDOWN := 0x104, "ON_KEYDOWN")
 Return
 
-GuiClose:
-Gui, Hide
-
 RControl::
     SetTimer, HideGui, 5000
     Init()
@@ -46,7 +43,7 @@ Hex(I, N) {
 
 ProcessCommand(KeyPressed) {
     global right_pad, _h_, _w_, context
-    SetTimer, GuiClose, Off
+    SetTimer, HideGui, Off
     If (KeyPressed == "Escape") {
         HideGui()        	    
     }
