@@ -6,17 +6,41 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 context := {}
 
-; SetBatchLines, -1
+; hook up to monitor window creation/activation/deletion
+Gui +LastFound
+hWnd := WinExist()
+DllCall( "RegisterShellHookWindow", UInt,hWnd )
+MsgNum := DllCall( "RegisterWindowMessage", Str,"SHELLHOOK" )
+OnMessage( MsgNum, "ShellMessage" )
+
+; create gui
 Gui, Margin, 20, 20
 Gui, Add, Text, vStatus , Enter Command
 OnMessage(WM_KEYDOWN := 0x100, "ON_KEYDOWN")
 OnMessage(WM_SYSKEYDOWN := 0x104, "ON_KEYDOWN")
 Return
 
+; show gui
 RControl::
     SetTimer, HideGui, 5000
     Init()
     Gui, Show
+
+ShellMessage(wParam, lParam) {
+    ; process window events
+    WinGetTitle, Title, ahk_id %lParam%
+    if ( wParam == 1 ) {
+        ;  HSHELL_WINDOWCREATED := 1
+        ;~ OutputDebug, window created %Title%
+    } else if( wParam == 4 or wParam == 32772) {
+        ; HSHELL_WINDOWACTIVATED := 4
+        ; HSHELL_RUDEAPPACTIVATED := 32772
+        ;~ OutputDebug, window activated %Title%
+    } else if( wParam == 2 ) {
+        ; HSHELL_WINDOWDESTROYED := 2
+        ;~ OutputDebug, window deleted %Title%
+    }
+}
 
 HideGui() {
     global context
