@@ -67,7 +67,7 @@ Hex(I, N) {
 }
 
 ProcessCommand(KeyPressed) {
-    global right_pad, _h_, _w_, context
+    global context
     SetTimer, HideGui, Off
     If (KeyPressed == "Escape") {
         HideGui()        	    
@@ -82,6 +82,7 @@ ProcessCommand(KeyPressed) {
         Focus(tgtid)
     } else if( KeyPressed == "s") {
         WinGet, tgtid, ID, ahk_exe slack.exe
+        Send, /{Backspace}
         Focus(tgtid)
     } else if( KeyPressed == "k") {
         WinGet, tgtid, ID, ahk_exe kitty.exe
@@ -103,10 +104,13 @@ ProcessCommand(KeyPressed) {
             WinMove, ahk_id %tmpid%,, x, y, w, h
         } else {
             fudge := 50
+            ; x fixed position plus half the window width
             search_x := x + ( w / 2) 
+            ; if in the bottom half of the screen, bottom minus fudge factor
             if( y > (context["e_sh"] / 2) - fudge ) {
                 search_y := context["e_sh"] - fudge
             } else {
+                ; top of the screen + fudge
                 search_y := y + fudge
             }
             tgtid := WinGetAtCoords( search_x, search_y)
@@ -124,7 +128,7 @@ ProcessCommand(KeyPressed) {
             tgtid := context["center_window"]
             Focus(tgtid)
         } else {
-            new_x := (context["e_sw"]/2)-(context["cur_w"]/2)
+            new_x := (context["e_sw"]/2)-(context["cur_w"]/2)+context["left_pad"]
             new_y := (context["e_sh"]/2)-(context["cur_h"]/2)
             tmpid := context["winid"]
             WinMove, ahk_id %tmpid% ,, new_x, new_y
@@ -138,6 +142,7 @@ ProcessCommand(KeyPressed) {
 
 Startup() {
     global
+    context["left_pad"] := 150
     context["right_pad"] := 205
     context["col"] := 3
     context["row"] := 2
@@ -146,7 +151,7 @@ Startup() {
     context["tray_w"] := _w_
     context["tray_h"] := _h_
     ; effective screen size
-    context["e_sw"] := A_ScreenWidth - context["right_pad"]
+    context["e_sw"] := A_ScreenWidth - context["right_pad"] - context["left_pad"]
     context["e_sh"] := A_ScreenHeight - context["tray_h"]
     context["colw"] := Floor(context["e_sw"] / context["col"])
     context["rowh"] := Floor(context["e_sh"] / context["row"])
@@ -156,7 +161,7 @@ Startup() {
     context["prow"] := []
     Loop, % context["col"] {
         mul := A_Index - 1
-        context["pcol"].Push(Floor(mul * context["colw"] ))
+        context["pcol"].Push(Floor(mul * context["colw"] )+context["left_pad"])
     }
 
     Loop, % context["row"] {
