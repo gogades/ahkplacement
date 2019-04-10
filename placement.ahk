@@ -5,6 +5,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance force
 
 context := {}
+Startup()
 
 ; hook up to monitor window creation/activation/deletion
 Gui +LastFound
@@ -88,37 +89,28 @@ ProcessCommand(KeyPressed) {
     } if( KeyPressed == "v") {
         WinGet, tgtid, ID, ahk_exe vncviewer.exe
         Focus(tgtid)
-    } else if( KeyPressed == "1" or KeyPressed == "Home" ) {
-        if( context["placement"] == false ) {
-            tgtid := WinGetAtCoords(100,100)
-            Focus(tgtid)
+    } if( KeyPressed > 0 and KeyPressed <= (context["col"]*context["row"]) ) {
+        num := Keypressed - 1
+        row := Floor( num / context["col"] )
+        col :=  num - ( row * context["col"] )
+
+        x := context["pcol"][col+1]
+        y := context["prow"][row+1] 
+        w := context["colw"]
+        h := context["rowh"]
+        tmpid := context["winid"]
+        if(context["placement"] == true) {
+            WinMove, ahk_id %tmpid%,, x, y, w, h
         } else {
-            tmpid := context["winid"]
-            WinMove, ahk_id %tmpid% ,,0,0, context["e_sw"]/2, context["e_sh"]/2
-        }
-    } else if( KeyPressed == "2" or KeyPressed == "PgUp" ) {
-        if( context["placement"] == false ) {
-            tgtid := WinGetAtCoords(context["e_sw"]-100, 100) 
+            fudge := 50
+            search_x := x + ( w / 2) 
+            if( y > (context["e_sh"] / 2) - fudge ) {
+                search_y := context["e_sh"] - fudge
+            } else {
+                search_y := y + fudge
+            }
+            tgtid := WinGetAtCoords( search_x, search_y)
             Focus(tgtid)
-        } else {
-            tmpid := context["winid"]
-            WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,0, context["e_sw"]/2, context["e_sh"]/2
-        }
-    } else if( KeyPressed == "3" or KeyPressed == "End" ) {
-        if( context["placement"] == false ) {
-            tgtid := WinGetAtCoords(100,context["e_sh"]-100) 
-            Focus(tgtid)
-        } else {
-            tmpid := context["winid"]
-            WinMove, ahk_id %tmpid% ,,0,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
-        }
-    } else if( KeyPressed == "4" or KeyPressed == "PgDn" ) {
-        if( context["placement"] == false ) {
-            tgtid := WinGetAtCoords(context["e_sw"]-100,context["e_sh"]-100) 
-            Focus(tgtid)
-        } else {
-            tmpid := context["winid"]
-            WinMove, ahk_id %tmpid% ,,context["e_sw"]/2,context["e_sh"]/2, context["e_sw"]/2, context["e_sh"]/2
         }
     } else if( KeyPressed == "m" ) {
         context["placement"] := true
@@ -144,26 +136,47 @@ ProcessCommand(KeyPressed) {
     HideGui()
 }
 
+Startup() {
+    global
+    context["right_pad"] := 205
+    context["col"] := 3
+    context["row"] := 2
+
+    WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd
+    context["tray_w"] := _w_
+    context["tray_h"] := _h_
+    ; effective screen size
+    context["e_sw"] := A_ScreenWidth - context["right_pad"]
+    context["e_sh"] := A_ScreenHeight - context["tray_h"]
+    context["colw"] := Floor(context["e_sw"] / context["col"])
+    context["rowh"] := Floor(context["e_sh"] / context["row"])
+
+    ; prepare position arrays
+    context["pcol"] := []
+    context["prow"] := []
+    Loop, % context["col"] {
+        mul := A_Index - 1
+        context["pcol"].Push(Floor(mul * context["colw"] ))
+    }
+
+    Loop, % context["row"] {
+        mul := A_Index - 1
+        context["prow"].Push(Floor(mul * context["rowh"]))
+    }
+}
+
 Init(){
-        global 
-        context["right_pad"] := 205
-        context["winid"] := WinExist("A")
-        winid := context["winid"]
-        WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
-        
-        context["cur_x"] := cur_x
-        context["cur_y"] := cur_y
-        context["cur_w"] := Width
-        context["cur_h"] := Height
-        
-        WinGetPos,,,_w_, _h_, ahk_class Shell_TrayWnd	
-        context["tray_w"] := _w_
-        context["tray_h"] := _h_
-        ; effective screen size
-        context["e_sw"] := A_ScreenWidth - context["right_pad"]
-        context["e_sh"] := A_ScreenHeight - context["tray_h"]
-        
-        context["placement"] := false
+    global
+    context["winid"] := WinExist("A")
+    winid := context["winid"]
+    WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
+
+    context["cur_x"] := cur_x
+    context["cur_y"] := cur_y
+    context["cur_w"] := Width
+    context["cur_h"] := Height
+
+    context["placement"] := false
 }
 
 Focus(tgtid)
