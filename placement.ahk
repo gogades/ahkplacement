@@ -28,12 +28,17 @@ RControl::
     Gui, Show
 
 ShellMessage(wParam, lParam) {
+    global context
     ; process window events
     WinGetTitle, Title, ahk_id %lParam%
+    if (title == "" or title == "placement.ahk")
+        return
     if ( wParam == 1 ) {
         ;  HSHELL_WINDOWCREATED := 1
         ;~ OutputDebug, window created %Title%
     } else if( wParam == 4 or wParam == 32772) {
+        context["previous"] := context["winid"]
+        context["winid"] := lParam
         ; HSHELL_WINDOWACTIVATED := 4
         ; HSHELL_RUDEAPPACTIVATED := 32772
         ;~ OutputDebug, window activated %Title%
