@@ -87,7 +87,6 @@ ProcessCommand(KeyPressed) {
         Focus(tgtid)
     } else if( KeyPressed == "s") {
         WinGet, tgtid, ID, ahk_exe slack.exe
-        Send, /{Backspace}
         Focus(tgtid)
     } else if( KeyPressed == "k") {
         WinGet, tgtid, ID, ahk_exe kitty.exe
@@ -195,6 +194,7 @@ Focus(tgtid)
     if (tgtid != -1 and tgtid != "" and tgtid != context["winid"]) {
         context["previous"] := context["winid"]
         WinActivate, ahk_id %tgtid%
+        FocusSlackTextField(tgtid)
     } else {
         ;~ MsgBox, not found
     }
@@ -219,6 +219,13 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
             break
     }
     return _hWin
+}
+
+FocusSlackTextField(tgtid) {
+    WinGetTitle, ttl, ahk_id %tgtid%
+    if (ttl == "slack.exe") {
+        Send, /{Backspace}
+    }
 }
 
 RAlt::
