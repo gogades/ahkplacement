@@ -71,14 +71,59 @@ Hex(I, N) {
    return tmpstr
 }
 
+ResizeAndPlace(x_incr, y_incr) {
+    global context
+    ;~ WinMove, ahk_id %tmpid%,, new_x, new_y, new_width, new_height
+    ; validate new width and height
+
+    OutputDebug, x incr %x_incr%  y incr %y_incr%
+
+    new_w := context["cur_w"]
+    new_h := context["cur_h"]
+    new_x := context["cur_x"]
+    new_y := context["cur_y"]
+
+    if( context["cur_w"] + x_incr <= context["e_sw"]) {
+        new_w := context["cur_w"] + x_incr
+    } else {
+        OutputDebug, would be too wide %x_incr%
+        return
+    }
+    if( context["cur_h"] + y_incr <= context["e_sh"]) {
+        new_h := context["cur_h"] + y_incr
+    } else {
+        OutputDebug, would be too tall y_incr
+        return
+    }
+    tmpid := context["winid"]
+    OutputDebug, new x %new_x% y %new_y% w %new_w%  h %new_h%
+    WinMove, ahk_id %tmpid%,, new_x, new_y, new_w, new_h
+
+}
+
 ProcessCommand(KeyPressed) {
     global context
     SetTimer, HideGui, Off
     If (KeyPressed == "Escape") {
-        HideGui()        	    
+        HideGui()
     }
     ; next commands need Init() called first
     tgtid := -1
+    x_incr := y_incr := 0
+    if( KeyPressed == "Down" ) {
+        y_incr := Floor(context["cur_h"] / 2 )
+        ResizeAndPlace(x_incr, y_incr)
+    } else if( KeyPressed == "Up" ) {
+        y_incr := 0 - Floor(context["cur_h"] / 2 )
+        ResizeAndPlace(x_incr, y_incr)
+    } else if( KeyPressed == "Left" ) {
+        x_incr := 0 - Floor(context["cur_w"] / 2 )
+        ResizeAndPlace(x_incr, y_incr)
+    } else if( KeyPressed == "Right" ) {
+        x_incr := Floor(context["cur_w"] / 2 )
+        ResizeAndPlace(x_incr, y_incr)
+
+    } else
     if( KeyPressed == "o") {
         WinGet, tgtid, ID, ahk_exe Spotify.exe
         Focus(tgtid)
@@ -100,7 +145,7 @@ ProcessCommand(KeyPressed) {
         col :=  num - ( row * context["col"] )
 
         x := context["pcol"][col+1]
-        y := context["prow"][row+1] 
+        y := context["prow"][row+1]
         w := context["colw"]
         h := context["rowh"]
         tmpid := context["winid"]
@@ -109,7 +154,7 @@ ProcessCommand(KeyPressed) {
         } else {
             fudge := 50
             ; x fixed position plus half the window width
-            search_x := x + ( w / 2) 
+            search_x := x + ( w / 2)
             ; if in the bottom half of the screen, bottom minus fudge factor
             if( y > (context["e_sh"] / 2) - fudge ) {
                 search_y := context["e_sh"] - fudge
