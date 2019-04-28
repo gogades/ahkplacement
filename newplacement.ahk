@@ -35,61 +35,74 @@ Startup()
 
 ; ==================================== focus by position
 ^#1::
+^#`::
 	FocusByPosition(0)
 	return
 
 ^#2::
+^#Home::
 	FocusByPosition(1)
 	return
 
 ^#3::
+^#PgUp::
 	FocusByPosition(2)
 	return
 
 ^#4::
+^#Delete::
 	FocusByPosition(3)
 	return
 
 ^#5::
+^#End::
 	FocusByPosition(4)
 	return
 
 ^#6::
+^#PgDn::
 	FocusByPosition(5)
 	return
 
 ; ==================================== toggle zoom on current window
 ^#z::
+^#/::
 	Zoom()
 	return
 
-; place by position
+; ==================================== place by position
 !^#1::
+!^#`::
 	winid := WinExist("A")
 	Place( winid, 0)
 	return
 
 !^#2::
+!^#Home::
 	winid := WinExist("A")
 	Place( winid, 1)
 	return
 
 !^#3::
+!^#PgUp::
 	winid := WinExist("A")
 	Place( winid, 2)
 	return
 
 !^#4::
+!^#Delete::
 	winid := WinExist("A")
 	Place( winid, 3)
 	return
 
 !^#5::
+!^#End::
 	winid := WinExist("A")
 	Place( winid, 4)
 	return
 
 !^#6::
+!^#PgDn::
 	winid := WinExist("A")
 	Place( winid, 5)
 	return
