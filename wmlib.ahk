@@ -35,6 +35,7 @@ Startup() {
 	context["previous"] := -1
 
 	; todo setup and capture window events
+	CaptureEvents()
 }
 
 Place(winid, num) {
@@ -213,4 +214,34 @@ Center() {
 LogOutput(message) {
 	dir = %A_ScriptDir%\log.txt
 	FileAppend,  %A_Hour%:%A_Min%:%A_Sec% %message%`r`n, %dir%
+}
+
+CaptureEvents() {
+	; hook up to monitor window creation/activation/deletion
+	Gui +LastFound
+	hWnd := WinExist()
+	DllCall( "RegisterShellHookWindow", UInt,hWnd )
+	MsgNum := DllCall( "RegisterWindowMessage", Str,"SHELLHOOK" )
+	OnMessage( MsgNum, "ShellMessage" )
+}
+
+ShellMessage(wParam, lParam) {
+    global context
+    ; process window events
+    WinGet, Title, ProcessName, ahk_id %lParam%
+    if (title == "" or title == "SciTE.exe")
+        return
+    if ( wParam == 1 ) {
+        ;  HSHELL_WINDOWCREATED := 1
+        ;~ OutputDebug, window created %Title%
+    } else if( wParam == 4 or wParam == 32772) {
+        context["previous"] := context["winid"]
+        context["winid"] := lParam
+        ; HSHELL_WINDOWACTIVATED := 4
+        ; HSHELL_RUDEAPPACTIVATED := 32772
+        ;~ OutputDebug, window activated %Title%
+    } else if( wParam == 2 ) {
+        ; HSHELL_WINDOWDESTROYED := 2
+        ;~ OutputDebug, window deleted %Title%
+    }
 }
