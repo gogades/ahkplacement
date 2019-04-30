@@ -109,6 +109,8 @@ FocusByPrevious() {
 }
 
 FocusByPosition(gridpos) {
+	; todo - if gridpos is currently focused, try to find the next one
+
 	global context, windows
 	Init()
 	for k,v in windows {
@@ -152,8 +154,12 @@ Zoom() {
 			tmpid := context["winid"]
 			if( v["zoomed"] == false ) {
 				v["zoomed"] := true
-				new_w := Abs( context["cur_w"] * 1.5 )
-				new_h := Abs( context["cur_h"] * 1.5 )
+				; default factors
+				width_factor := 1.5
+				height_factor := 1.5
+				ZoomFactor( width_factor, height_factor)
+				new_w := Abs( context["cur_w"] * width_factor )
+				new_h := Abs( context["cur_h"] * height_factor )
 				new_x := (context["e_sw"]/2)-(new_w/2)+context["left_pad"]
 				new_y := (context["e_sh"]/2)-(new_h/2)
 
@@ -165,6 +171,21 @@ Zoom() {
 			}
 		}
 	}
+}
+
+ZoomFactor(ByRef width_factor, ByRef height_factor) {
+	global context
+	tmpid := context["winid"]
+	WinGet, ttl, ProcessName, ahk_id %tmpid%
+	if( ttl == "kitty.exe" ) {
+		width_factor := 1.0
+		height_factor := 1.5
+		return
+	}
+}
+
+Center() {
+; todo - similar to zoom but keep the size the same
 }
 
 LogOutput(message) {
