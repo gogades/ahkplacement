@@ -33,6 +33,8 @@ Startup() {
     }
 
 	context["previous"] := -1
+
+	; todo setup and capture window events
 }
 
 Place(winid, num) {
@@ -70,6 +72,7 @@ SaveWindow(winid, gridpos, new_x, new_y, new_w, new_h){
     data.cur["h"] := new_h
 	data.cur["grid"] := gridpos
 	data.zoomed := false
+	data.centered := false
 	windows[winid] := data
 }
 
@@ -119,6 +122,8 @@ FocusByPosition(gridpos) {
 			return
 		}
 	}
+	; todo if window is not found in list, search screen by pixel and add and tag that window
+	; to that grid value
 }
 
 Focus( tgtid ) {
@@ -186,6 +191,23 @@ ZoomFactor(ByRef width_factor, ByRef height_factor) {
 
 Center() {
 ; todo - similar to zoom but keep the size the same
+	global context, windows
+	Init()
+	for k,v in windows {
+		if( k == context["winid"] ) {
+			tmpid := context["winid"]
+			if( v["centered"] == false ) {
+				v["centered"] := true
+				new_x := (context["e_sw"]/2)-(context["cur_w"]/2)+context["left_pad"]
+				new_y := (context["e_sh"]/2)-(context["cur_h"]/2)
+				tmpid := context["winid"]
+				WinMove, ahk_id %tmpid% ,, new_x, new_y
+			} else {
+				v["centered"] := false
+				Place(tmpid, v["cur"]["grid"])
+			}
+		}
+	}
 }
 
 LogOutput(message) {

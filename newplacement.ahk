@@ -64,11 +64,17 @@ Startup()
 	FocusByPosition(5)
 	return
 
-; ==================================== toggle zoom on current window
+; ==================================== toggle zoom or center on current window
 ^#z::
 ^#/::
 	Zoom()
 	return
+
+^#c::
+^#.::
+	Center()
+	return
+
 
 ; ==================================== place by position
 !^#1::
