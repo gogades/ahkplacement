@@ -39,7 +39,7 @@ Startup() {
 }
 
 Place(winid, num) {
-	global
+	global context
 	row := Floor( num / context["col"] )
 	col :=  num - ( row * context["col"] )
 
@@ -123,8 +123,14 @@ FocusByPosition(gridpos) {
 			return
 		}
 	}
-	; todo if window is not found in list, search screen by pixel and add and tag that window
-	; to that grid value
+	; nothing found, try by position
+	tgtid := FindByCoords(gridpos)
+	if( tgtid != "" ) {
+		; we found something - focus it, and add it to our list
+		Focus(tgtid)
+		SaveWindow(tgtid, gridpos, context["cur_x"], context["cur_y"], context["cur_w"], context["cur_h"])
+	}
+
 }
 
 Focus( tgtid ) {
@@ -235,8 +241,10 @@ ShellMessage(wParam, lParam) {
         ;  HSHELL_WINDOWCREATED := 1
         ;~ OutputDebug, window created %Title%
     } else if( wParam == 4 or wParam == 32772) {
-        context["previous"] := context["winid"]
-        context["winid"] := lParam
+		if( context["previous"] != context["winid"] ) {
+			context["previous"] := context["winid"]
+			context["winid"] := lParam
+		}
         ; HSHELL_WINDOWACTIVATED := 4
         ; HSHELL_RUDEAPPACTIVATED := 32772
         ;~ OutputDebug, window activated %Title%
@@ -244,4 +252,49 @@ ShellMessage(wParam, lParam) {
         ; HSHELL_WINDOWDESTROYED := 2
         ;~ OutputDebug, window deleted %Title%
     }
+}
+
+FindByCoords(num) {
+	global context, windows
+	row := Floor( num / context["col"] )
+	col :=  num - ( row * context["col"] )
+
+	x := context["pcol"][col+1]
+	y := context["prow"][row+1]
+	w := context["colw"]
+	h := context["rowh"]
+
+	fudge := 50
+	; x fixed position plus half the window width
+	search_x := x + ( w / 2)
+	; if in the bottom half of the screen, bottom minus fudge factor
+	if( y > (context["e_sh"] / 2) - fudge ) {
+		search_y := context["e_sh"] - fudge
+	} else {
+		; top of the screen + fudge
+		search_y := y + fudge
+	}
+	tgtid := WinGetAtCoords( search_x, search_y)
+	return tgtid
+}
+
+WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to screen
+{
+    global winid, cur_x, cur_y, Width, Height, _w_, _h_, context
+    WinGet, _IDs, List,,, Program Manager
+    Loop, %_ids%
+    {
+        _hWin := _ids%A_Index%
+        WinGetTitle, _title, ahk_id %_hWin%
+        if( _title == "NVIDIA GeForce Overlay" or _title == "Stream Viewer" or InStr(_title, "VirtualBox"))
+            continue
+        WinGetPos,,, w, h, ahk_id %_hWin%
+        if (w < 110 or h < 110 or _title = "") ; Comment this out if you want to include small windows and windows without title
+            continue
+        WinGetPos, left, top, right, bottom, ahk_id %_hWin%
+        right += left, bottom += top
+        if (xCoord >= left && xCoord <= right && yCoord >= top && yCoord <= bottom && _hWin != ExludeWinID)
+            break
+    }
+    return _hWin
 }
