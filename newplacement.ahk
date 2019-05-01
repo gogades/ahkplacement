@@ -36,31 +36,37 @@ Startup()
 ; ==================================== focus by position
 ^#1::
 ^#`::
+	Init()
 	FocusByPosition(0)
 	return
 
 ^#2::
 ^#Home::
+	Init()
 	FocusByPosition(1)
 	return
 
 ^#3::
 ^#PgUp::
+	Init()
 	FocusByPosition(2)
 	return
 
 ^#4::
 ^#Delete::
+	Init()
 	FocusByPosition(3)
 	return
 
 ^#5::
 ^#End::
+	Init()
 	FocusByPosition(4)
 	return
 
 ^#6::
 ^#PgDn::
+	Init()
 	FocusByPosition(5)
 	return
 

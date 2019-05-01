@@ -104,6 +104,9 @@ FocusByName(exename)
 	Init()
 	WinGet, tgtid, ID, ahk_exe %exename%
 	Focus(tgtid)
+	; todo - check to see if we have it in our list, and if not, try to determine
+	; which grid pos it belongs to.  Not trivial because we need to search starting
+	; at the right location for each grid square. So whatever, for now.
 }
 
 FocusByPrevious() {
@@ -113,14 +116,56 @@ FocusByPrevious() {
 }
 
 FocusByPosition(gridpos) {
-	; todo - if gridpos is currently focused, try to find the next one
-
 	global context, windows
-	Init()
+	; this code smells
+
+	; find all the windows marked for that grid
+	; note the first so we can do the circular list thing
+	gridlist := {}
+	first := -1
 	for k,v in windows {
 		if( v["cur"]["grid"] == gridpos ) {
-			Focus( k )
+			gridlist[k] := v
+			if(first == -1 ) {
+				first := k
+			}
+		}
+	}
+	; none were marked - find by pixel position and save it
+	if (gridlist.Length() == 0 ) {
+		; nothing found, try by position
+		tgtid := FindByCoords(gridpos)
+		if( tgtid != "" ) {
+			; we found something - focus it, and add it to our list
+			Focus(tgtid)
+			SaveWindow(tgtid, gridpos, context["cur_x"], context["cur_y"], context["cur_w"], context["cur_h"])
 			return
+		}
+	}
+	; find the currently focused one, and focus on the next in the list
+	next := false
+	for k,v in gridlist {
+		if( k == context["winid"] ) {
+			next := true
+		} else {
+			if(next == true ) {
+				Focus(k)
+				return
+			}
+		}
+	}
+	; turns out, there was no "next in the list", so go to the first.
+	Focus(first)
+	return
+
+	for k,v in windows {
+		if( v["cur"]["grid"] == gridpos ) {
+			; if this is not the currently focused one, go ahead
+			; otherwise keep searching
+			if( k != context["winid"] ) {
+				Focus( k )
+				return
+			}
 		}
 	}
 	; nothing found, try by position
@@ -286,7 +331,7 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
     {
         _hWin := _ids%A_Index%
         WinGetTitle, _title, ahk_id %_hWin%
-        if( _title == "NVIDIA GeForce Overlay" or _title == "Stream Viewer" or InStr(_title, "VirtualBox"))
+        if( _title == "NVIDIA GeForce Overlay" or _title == "Stream Viewer")
             continue
         WinGetPos,,, w, h, ahk_id %_hWin%
         if (w < 110 or h < 110 or _title = "") ; Comment this out if you want to include small windows and windows without title
@@ -294,7 +339,7 @@ WinGetAtCoords(xCoord, yCoord, ExludeWinID="") ; CoordMode must be relative to s
         WinGetPos, left, top, right, bottom, ahk_id %_hWin%
         right += left, bottom += top
         if (xCoord >= left && xCoord <= right && yCoord >= top && yCoord <= bottom && _hWin != ExludeWinID)
-            break
+            return _hWin
     }
-    return _hWin
+    return ""
 }
