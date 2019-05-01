@@ -117,65 +117,45 @@ FocusByPrevious() {
 
 FocusByPosition(gridpos) {
 	global context, windows
-	; this code smells
+	; this code doesn't smell quite as bad now
+	; but it still does
 
 	; find all the windows marked for that grid
 	; note the first so we can do the circular list thing
 	gridlist := {}
 	first := -1
+	next := false
 	for k,v in windows {
 		if( v["cur"]["grid"] == gridpos ) {
+			if( next == true ) {
+				Focus(k)
+				return
+			}
+			if( k == context["winid"] ) {
+				; it's currently focused, go to the next one in the list
+				next := true
+			}
 			gridlist[k] := v
 			if(first == -1 ) {
 				first := k
 			}
 		}
 	}
+	; if we determined we were in focus (via next == true) but we get here
+	; it means we got to the end of the list before switching - Focus the first
+	if(next == true and first != -1 ) {
+		Focus(first)
+		return
+	}
 	; none were marked - find by pixel position and save it
-	if (gridlist.Length() == 0 ) {
-		; nothing found, try by position
-		tgtid := FindByCoords(gridpos)
-		if( tgtid != "" ) {
-			; we found something - focus it, and add it to our list
-			Focus(tgtid)
-			SaveWindow(tgtid, gridpos, context["cur_x"], context["cur_y"], context["cur_w"], context["cur_h"])
-			return
-		}
-	}
-	; find the currently focused one, and focus on the next in the list
-	next := false
-	for k,v in gridlist {
-		if( k == context["winid"] ) {
-			next := true
-		} else {
-			if(next == true ) {
-				Focus(k)
-				return
-			}
-		}
-	}
-	; turns out, there was no "next in the list", so go to the first.
-	Focus(first)
-	return
-
-	for k,v in windows {
-		if( v["cur"]["grid"] == gridpos ) {
-			; if this is not the currently focused one, go ahead
-			; otherwise keep searching
-			if( k != context["winid"] ) {
-				Focus( k )
-				return
-			}
-		}
-	}
 	; nothing found, try by position
 	tgtid := FindByCoords(gridpos)
 	if( tgtid != "" ) {
 		; we found something - focus it, and add it to our list
 		Focus(tgtid)
 		SaveWindow(tgtid, gridpos, context["cur_x"], context["cur_y"], context["cur_w"], context["cur_h"])
+		return
 	}
-
 }
 
 Focus( tgtid ) {
