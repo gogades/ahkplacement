@@ -9,130 +9,130 @@ Startup()
 
 ; ==================================== focus by app name
 ^#s::
-	FocusByName("slack.exe")
-	return
+    FocusByName("slack.exe")
+    return
 
 ^#k::
-	FocusByName("kitty.exe")
-	return
+    FocusByName("kitty.exe")
+    return
 
 ^#v::
-	FocusByName("vncviewer.exe")
-	return
+    FocusByName("vncviewer.exe")
+    return
 
 ^#o::
-	FocusByName("Spotify.exe")
-	return
+    FocusByName("Spotify.exe")
+    return
 
 ^#t::
-	FocusByName("thunderbird.exe")
-	return
+    FocusByName("thunderbird.exe")
+    return
 
 ; ==================================== focus previous
 ^#p::
-	FocusByPrevious()
-	return
+    FocusByPrevious()
+    return
 
 ; ==================================== focus by position
 ^#1::
 ^#`::
-	Init()
-	FocusByPosition(0)
-	return
+    Init()
+    FocusByPosition(0)
+    return
 
 ^#2::
 ^#Home::
-	Init()
-	FocusByPosition(1)
-	return
+    Init()
+    FocusByPosition(1)
+    return
 
 ^#3::
 ^#PgUp::
-	Init()
-	FocusByPosition(2)
-	return
+    Init()
+    FocusByPosition(2)
+    return
 
 ^#4::
 ^#Delete::
-	Init()
-	FocusByPosition(3)
-	return
+    Init()
+    FocusByPosition(3)
+    return
 
 ^#5::
 ^#End::
-	Init()
-	FocusByPosition(4)
-	return
+    Init()
+    FocusByPosition(4)
+    return
 
 ^#6::
 ^#PgDn::
-	Init()
-	FocusByPosition(5)
-	return
+    Init()
+    FocusByPosition(5)
+    return
 
 ; ==================================== toggle zoom or center on current window
 ^#z::
 ^#/::
-	Zoom()
-	return
+    Zoom()
+    return
 
 ^#c::
 ^#.::
-	Center()
-	return
+    Center()
+    return
 
 
 ; ==================================== place by position
 !^#1::
 !^#`::
-	winid := WinExist("A")
-	Place( winid, 0)
-	return
+    winid := WinExist("A")
+    Place( winid, 0)
+    return
 
 !^#2::
 !^#Home::
-	winid := WinExist("A")
-	Place( winid, 1)
-	return
+    winid := WinExist("A")
+    Place( winid, 1)
+    return
 
 !^#3::
 !^#PgUp::
-	winid := WinExist("A")
-	Place( winid, 2)
-	return
+    winid := WinExist("A")
+    Place( winid, 2)
+    return
 
 !^#4::
 !^#Delete::
-	winid := WinExist("A")
-	Place( winid, 3)
-	return
+    winid := WinExist("A")
+    Place( winid, 3)
+    return
 
 !^#5::
 !^#End::
-	winid := WinExist("A")
-	Place( winid, 4)
-	return
+    winid := WinExist("A")
+    Place( winid, 4)
+    return
 
 !^#6::
 !^#PgDn::
-	winid := WinExist("A")
-	Place( winid, 5)
-	return
+    winid := WinExist("A")
+    Place( winid, 5)
+    return
 
 ; ==================================== place by arrowkey
 !^#Up::
-	Move( 0 - context["col"] )
-	return
+    Move( 0 - context["col"] )
+    return
 
 !^#Down::
-	Move( context["col"] )
-	return
+    Move( context["col"] )
+    return
 
 !^#Left::
-	Move( -1 )
-	return
+    Move( -1 )
+    return
 
 !^#Right::
-	Move( 1 )
-	return
+    Move( 1 )
+    return
 
