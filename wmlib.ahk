@@ -122,6 +122,7 @@ FocusByPosition(gridpos) {
 
     ; find all the windows marked for that grid
     ; note the first so we can do the circular list thing
+    ; or focus it if it's the only one in the stack
     gridlist := {}
     first := -1
     next := false
@@ -141,9 +142,8 @@ FocusByPosition(gridpos) {
             }
         }
     }
-    ; if we determined we were in focus (via next == true) but we get here
-    ; it means we got to the end of the list before switching - Focus the first
-    if(next == true and first != -1 ) {
+    ; if there is no next window in the stack, and we're not in focus already, focus that
+    if(first != -1 and first != context["winid"] ) {
         Focus(first)
         return
     }
