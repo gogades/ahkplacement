@@ -244,7 +244,11 @@ Center() {
 
 LogOutput(message) {
     dir = %A_ScriptDir%\log.txt
-    FileAppend,  %A_Hour%:%A_Min%:%A_Sec% %message%`r`n, %dir%
+    foo := FileOpen(dir, "a")
+    m = %A_Hour%:%A_Min%:%A_Sec% %message%`r`n
+    foo.Write(m)
+    foo.Read(0)
+    foo.Close()
 }
 
 CaptureEvents() {
