@@ -7,6 +7,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #Include wmlib.ahk
 Startup()
 
+
+^!d::
+    DumpDebugData()
+    return
+
 ; ==================================== focus by app name
 ^#s::
     FocusByName("slack.exe")
@@ -80,7 +85,6 @@ Startup()
 ^#.::
     Center()
     return
-
 
 ; ==================================== place by position
 !^#1::

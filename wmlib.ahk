@@ -5,6 +5,7 @@ context := {}
 
 Startup() {
     global
+    context["debug"] := false
     context["left_pad"] := 150
     context["right_pad"] := 205
     context["col"] := 3
@@ -54,6 +55,7 @@ Place(winid, num) {
 SaveWindow(winid, gridpos, new_x, new_y, new_w, new_h){
     global
     WinGetPos, cur_x, cur_y, Width, Height, ahk_id %winid%
+    WinGetTitle, _ttl, ahk_id %winid%
     data := {}
 
     prevdata := windows[winid]
@@ -74,7 +76,22 @@ SaveWindow(winid, gridpos, new_x, new_y, new_w, new_h){
     data.cur["grid"] := gridpos
     data.zoomed := false
     data.centered := false
+    data.title := _ttl
     windows[winid] := data
+}
+
+DumpDebugData() {
+    global context, windows
+    SetFormat Integer, H
+    Init()
+    id := context["winid"]
+    LogOutput("Currently focused: " . id . " Title: " . windows[id].title )
+    id := context["previous"]
+    LogOutput("Previousl focused: " . id . " Title: " . windows[id].title )
+    for k,v in windows {
+        LogOutput("Window id: " . k . " Grid: " . v.cur["grid"] . " Title: " . SubStr(v.title,1, 15) )
+    }
+    LogOutput("-----------------------------------")
 }
 
 FocusSlackTextField(tgtid) {
@@ -243,12 +260,15 @@ Center() {
 }
 
 LogOutput(message) {
-    dir = %A_ScriptDir%\log.txt
-    foo := FileOpen(dir, "a")
-    m = %A_Hour%:%A_Min%:%A_Sec% %message%`r`n
-    foo.Write(m)
-    foo.Read(0)
-    foo.Close()
+    global context
+    if( context["debug"] == true ) {
+        dir = %A_ScriptDir%\log.txt
+        foo := FileOpen(dir, "a")
+        m = %A_Hour%:%A_Min%:%A_Sec% %message%`r`n
+        foo.Write(m)
+        foo.Read(0)
+        foo.Close()
+    }
 }
 
 CaptureEvents() {
@@ -261,7 +281,7 @@ CaptureEvents() {
 }
 
 ShellMessage(wParam, lParam) {
-    global context
+    global context, windows
     ; process window events
     WinGet, Title, ProcessName, ahk_id %lParam%
     if (title == "" or title == "SciTE.exe")
@@ -269,7 +289,12 @@ ShellMessage(wParam, lParam) {
     if ( wParam == 1 ) {
         ;  HSHELL_WINDOWCREATED := 1
         ;~ OutputDebug, window created %Title%
+        LogOutput("**** Created: " . lParam )
     } else if( wParam == 4 or wParam == 32772) {
+        SetFormat Integer, H
+        prev := context["previous"]
+        cur := context["winid"]
+        LogOutput("**** Focus change to: " . lParam . " Previous is : " . prev )
         if( context["previous"] != context["winid"] ) {
             context["previous"] := context["winid"]
             context["winid"] := lParam
@@ -277,9 +302,11 @@ ShellMessage(wParam, lParam) {
         ; HSHELL_WINDOWACTIVATED := 4
         ; HSHELL_RUDEAPPACTIVATED := 32772
         ;~ OutputDebug, window activated %Title%
+
     } else if( wParam == 2 ) {
         ; HSHELL_WINDOWDESTROYED := 2
         ;~ OutputDebug, window deleted %Title%
+        LogOutput("**** Deleted: " . lParam )
     }
 }
 
